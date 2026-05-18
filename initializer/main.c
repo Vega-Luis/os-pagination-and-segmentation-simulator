@@ -39,6 +39,7 @@ int main()
     mem->buscando = 0;
     mem->n_muertos = 0;
     mem->n_terminados = 0;
+    mem->shutdown = 0;
 
     for (int i = 0; i < total; i++)
     {
