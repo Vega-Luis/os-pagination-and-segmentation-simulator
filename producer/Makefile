@@ -4,7 +4,7 @@ CFLAGS =
 SRC=main.c
 
 all:
-	$(CC) $(CFLAGS) $(SRC) -o main.out
+	$(CC) $(CFLAGS) $(SRC) -o producer.out
 
 clean:
-	rm -f main.out
+	rm -f producer.out
