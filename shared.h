@@ -44,6 +44,8 @@ typedef struct
     int n_muertos;
     pid_t terminados[MAX_PROCS];
     int n_terminados;
+    
+    int shutdown; // bandera para apagar el sistema
 } MemoriaCompartida;
 
 // Union requerida por semctl

@@ -196,7 +196,7 @@ int main()
     printf("Generando procesos cada 30-60 segundos. Ctrl+C para detener.\n\n");
 
     // Loop principal
-    while (1)
+    while (!mem->shutdown)
     {
         ParamsHilo *p = malloc(sizeof(ParamsHilo));
         p->esquema = esquema;
