@@ -18,6 +18,38 @@ void sem_signal_mem(int semid)
     semop(semid, &op, 1);
 }
 
+void display_memory_status(MemoriaCompartida *mem)
+{
+    printf("\nEstado de la memoria:\n\n");
+
+    printf("%-11s %-12s %-10s %-10s\n",
+            "Dirección",
+            "Estado",
+            "PID",
+            "Info");
+
+    for (int address = 0; address < mem->total_espacios; address++) {
+        Espacio slot = mem->memoria[address];
+
+        char pid[16] = "-";
+        char info[32] = "-";
+
+        if (slot.estado == OCUPADO) {
+            sprintf(pid, "%d", slot.pid);
+
+            if (mem->esquema == SEGMENTACION) {
+                sprintf(info, "SEG %d", slot.segmento);
+            }
+        }
+
+        printf("%02d         %-12s %-10s %-10s\n",
+                address,
+                slot.estado == LIBRE ? "LIBRE" : "OCUPADO",
+                pid,
+                info);
+    }
+}
+
 int main()
 {
     int shmid = shmget(SHM_KEY,
@@ -49,30 +81,7 @@ int main()
 
     sem_wait_mem(semid);
 
-    printf("\n=== ESTADO DE MEMORIA ===\n\n");
-
-    for (int i = 0; i < mem->total_espacios; i++)
-    {
-        Espacio e = mem->memoria[i];
-
-        printf("Espacio[%02d] ", i);
-
-        if (e.estado == LIBRE)
-        {
-            printf("LIBRE\n");
-        }
-        else
-        {
-            printf("OCUPADO | PID=%d", e.pid);
-
-            if (mem->esquema == SEGMENTACION)
-            {
-                printf(" | SEG=%d", e.segmento);
-            }
-
-            printf("\n");
-        }
-    }
+    display_memory_status(mem);
 
     printf("\n=== PROCESOS EN MEMORIA ===\n");
 
