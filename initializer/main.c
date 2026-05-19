@@ -40,6 +40,7 @@ int main()
     mem->n_muertos = 0;
     mem->n_terminados = 0;
     mem->shutdown = 0;
+    mem->n_locked = 0;
 
     for (int i = 0; i < total; i++)
     {
@@ -67,6 +68,10 @@ int main()
     }
 
     printf("Semaforo creado. (semid=%d)\n", semid);
+
+
+    sem_init(&mem->headers_sem, 1, 1);
+    printf("Semaforo para headers inicializado.\n");
 
     // --- Crear archivo de bitacora ---
     FILE *log = fopen(LOG_FILE, "w");

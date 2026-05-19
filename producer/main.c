@@ -52,6 +52,43 @@ typedef struct
     int tiempo;   // segundos de sleep
 } ParamsHilo;
 
+void add_locked_process(MemoriaCompartida *mem, pid_t pid)
+{
+    sem_wait(&mem->headers_sem);
+
+    if (mem->n_locked < MAX_PROCS)
+    {
+        mem->locked[mem->n_locked++] = pid;
+    }
+
+    sem_post(&mem->headers_sem);
+}
+
+void remove_locked_process(MemoriaCompartida *mem, pid_t pid)
+{
+    sleep(10);
+    sem_wait(&mem->headers_sem);
+    printf("Removiendo PID=%d de locked...\n", pid);
+    for (int i = 0; i < mem->n_locked; i++) {
+        printf("Locked[%d] = %d\n", i, mem->locked[i]);
+    }
+
+    for (int i = 0; i < mem->n_locked; i++)
+    {
+        if (mem->locked[i] == pid)
+        {
+            mem->locked[i] =
+                mem->locked[mem->n_locked - 1];
+
+            mem->n_locked--;
+
+            break;
+        }
+    }
+
+    sem_post(&mem->headers_sem);
+}
+
 // ─── Lógica de cada proceso ───
 void *proceso(void *arg)
 {
@@ -65,10 +102,16 @@ void *proceso(void *arg)
            p->cantidad, p->tiempo);
 
     // ── 1. Pedir semáforo ──
+    sem_wait(&mem->headers_sem);
     mem->buscando = pid;
+    sem_post(&mem->headers_sem);
+
+    add_locked_process(mem, pid);
     sem_wait_mem();
+    remove_locked_process(mem, pid);
 
     // ── 2. Buscar espacio ──
+    sleep(5); // Simular tiempo de búsqueda
     int asignados[MAX_MEM];
     int n_asignados = 0;
     int espacios_necesarios = (p->esquema == PAGINACION)
@@ -118,12 +161,21 @@ void *proceso(void *arg)
     // ── 4. Devolver semáforo ──
     sem_signal_mem();
 
+    if (mem->shutdown) {
+        printf("[TID=%lu] PID=%d Apagando proceso por shutdown.\n", tid, pid);
+        free(p);
+        return NULL;
+    }
+
     // ── 5. Sleep ──
     printf("[TID=%lu] PID=%d Usando memoria por %ds...\n", tid, pid, p->tiempo);
     sleep(p->tiempo);
 
     // ── 6. Pedir semáforo para liberar ──
+    add_locked_process(mem, pid);
     sem_wait_mem();
+    remove_locked_process(mem, pid);
+
 
     // ── 7. Liberar memoria ──
     for (int i = 0; i < n_asignados; i++)

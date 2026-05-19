@@ -5,11 +5,12 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+#include <semaphore.h>
 
 // Claves IPC
 #define SHM_KEY 0x1234
 #define SEM_KEY 0x5678
-#define LOG_FILE "bitacora.log"
+#define LOG_FILE "../logs/bitacora.log"
 
 // Límites
 #define MAX_MEM 50
@@ -32,20 +33,23 @@ typedef struct
 } Espacio;
 
 // Memoria compartida completa
-typedef struct
-{
+typedef struct {
     Espacio memoria[MAX_MEM];
     int total_espacios;
     int esquema; // PAGINACION o SEGMENTACION
 
-    // Para el Espía
     pid_t buscando; // PID del proceso buscando espacio ahora
     pid_t muertos[MAX_PROCS];
     int n_muertos;
     pid_t terminados[MAX_PROCS];
     int n_terminados;
-    
-    int shutdown; // bandera para apagar el sistema
+    pid_t locked[MAX_PROCS];
+    int n_locked;
+
+    sem_t headers_sem;
+
+    int shutdown;
+
 } MemoriaCompartida;
 
 // Union requerida por semctl
