@@ -9,7 +9,7 @@
 // Claves IPC
 #define SHM_KEY 0x1234
 #define SEM_KEY 0x5678
-#define LOG_FILE "bitacora.log"
+#define LOG_FILE "../logs/bitacora.log"
 
 // Límites
 #define MAX_MEM 50
