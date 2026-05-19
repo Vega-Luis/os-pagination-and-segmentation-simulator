@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/syscall.h>
 #include "../shared.h"
 
 // Variables globales
@@ -55,7 +56,7 @@ typedef struct
 void *proceso(void *arg)
 {
     ParamsHilo *p = (ParamsHilo *)arg;
-    pid_t pid = getpid();
+    pid_t pid = syscall(SYS_gettid);
     pthread_t tid = pthread_self();
 
     printf("[TID=%lu] Proceso listo. Esquema=%s cantidad=%d tiempo=%ds\n",
@@ -219,7 +220,7 @@ int main()
         pthread_detach(hilo);
 
         // Esperar 30-60s para el siguiente proceso
-        int espera = (rand() % 31) + 30;
+        int espera = (rand() % 11) + 10;
         printf("[Productor] Siguiente proceso en %ds...\n", espera);
         sleep(espera);
     }
